@@ -27,7 +27,7 @@ export default function Layout({ children, currentPageName }) {
               <span className="text-xl">🐄</span>
             </div>
             <div>
-              <h1 className="font-bold text-gray-800 text-lg">FarmTracker</h1>
+              <h1 className="font-bold text-gray-800 text-lg">Critter Log</h1>
               <p className="text-xs text-gray-500">Animal Health Manager</p>
             </div>
           </Link>
@@ -82,7 +82,7 @@ export default function Layout({ children, currentPageName }) {
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center">
               <span className="text-lg">🐄</span>
             </div>
-            <span className="font-bold text-gray-800">FarmTracker</span>
+            <span className="font-bold text-gray-800">Critter Log</span>
           </Link>
           <Button
             variant="ghost"
