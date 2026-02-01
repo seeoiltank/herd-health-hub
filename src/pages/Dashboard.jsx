@@ -53,7 +53,7 @@ export default function Dashboard() {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <h1 className="text-4xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
-                Farm Dashboard
+                Critter Log
               </h1>
               <p className="text-gray-600 mt-1">Welcome back! Here's how your animals are doing 🌾</p>
             </div>
