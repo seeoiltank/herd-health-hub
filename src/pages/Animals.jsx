@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
-import { Plus, Search, Filter, Grid3X3, List } from "lucide-react";
+import { Plus, Search, Filter, Grid3X3, List, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -17,6 +17,7 @@ export default function Animals() {
   const [speciesFilter, setSpeciesFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [viewMode, setViewMode] = useState("grid");
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const queryClient = useQueryClient();
 
@@ -24,6 +25,12 @@ export default function Animals() {
     queryKey: ['animals'],
     queryFn: () => base44.entities.Animal.list('-created_date')
   });
+
+  const handleRefresh = useCallback(async () => {
+    setIsRefreshing(true);
+    await queryClient.invalidateQueries({ queryKey: ['animals'] });
+    setTimeout(() => setIsRefreshing(false), 500);
+  }, [queryClient]);
 
   const filteredAnimals = animals.filter(animal => {
     const matchesSearch = animal.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -55,13 +62,23 @@ export default function Animals() {
               </h1>
               <p className="text-gray-600 mt-1">Manage and track all your farm animals 🐾</p>
             </div>
-            <Button 
-              onClick={() => setShowForm(true)}
-              className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 shadow-lg shadow-orange-200"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Add Animal
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={handleRefresh}
+                disabled={isRefreshing}
+              >
+                <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+              </Button>
+              <Button 
+                onClick={() => setShowForm(true)}
+                className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 shadow-lg shadow-orange-200"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Add Animal
+              </Button>
+            </div>
           </div>
         </motion.div>
 
