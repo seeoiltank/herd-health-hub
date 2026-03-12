@@ -1,5 +1,4 @@
 import * as React from "react"
-import { useMediaQuery } from "@/components/lib/use-media-query"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -20,6 +19,24 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Check } from "lucide-react"
 import { cn } from "@/lib/utils"
+
+function useMediaQuery(query) {
+  const [value, setValue] = React.useState(false)
+
+  React.useEffect(() => {
+    function onChange(event) {
+      setValue(event.matches)
+    }
+
+    const result = matchMedia(query)
+    result.addEventListener("change", onChange)
+    setValue(result.matches)
+
+    return () => result.removeEventListener("change", onChange)
+  }, [query])
+
+  return value
+}
 
 export function ResponsiveSelect({ value, onValueChange, placeholder, options, label, required }) {
   const [open, setOpen] = React.useState(false)
