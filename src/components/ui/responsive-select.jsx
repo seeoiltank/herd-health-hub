@@ -1,5 +1,5 @@
 import * as React from "react"
-import { useMediaQuery } from "@/lib/use-media-query"
+import { useMediaQuery } from "@/components/lib/use-media-query"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,

@@ -136,7 +136,7 @@ export default function Layout({ children, currentPageName }) {
       </header>
 
       {/* Mobile Bottom Navigation */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50 select-none" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
         <div className="flex items-center justify-around px-2 py-2">
           {navItems.map((item) => {
             const isActive = location.pathname === createPageUrl(item.page) || 
@@ -145,14 +145,14 @@ export default function Layout({ children, currentPageName }) {
               <Link
                 key={item.page}
                 to={createPageUrl(item.page)}
-                className={`flex flex-col items-center gap-1 px-4 py-2 rounded-lg transition-colors ${
+                className={`flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-colors select-none ${
                   isActive 
                     ? 'text-amber-600' 
                     : 'text-gray-500'
                 }`}
               >
-                <item.icon className={`w-6 h-6 ${isActive ? 'text-amber-600' : ''}`} />
-                <span className="text-xs font-medium">{item.name}</span>
+                <item.icon className={`w-5 h-5 ${isActive ? 'text-amber-600' : ''}`} />
+                <span className="text-[10px] font-medium">{item.name}</span>
               </Link>
             );
           })}
