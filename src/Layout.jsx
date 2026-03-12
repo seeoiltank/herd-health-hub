@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { 
-  Home, PawPrint, Syringe, Stethoscope, Menu, X
+  Home, PawPrint, Syringe, Stethoscope, Menu, X, User
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
@@ -16,9 +16,10 @@ const navItems = [
 
 export default function Layout({ children, currentPageName }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const location = useLocation();
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
       {/* Desktop Sidebar */}
       <aside className="hidden lg:flex fixed left-0 top-0 h-full w-64 bg-white border-r border-gray-200 flex-col z-50">
         <div className="p-6 border-b border-gray-100">
@@ -76,7 +77,7 @@ export default function Layout({ children, currentPageName }) {
       </aside>
 
       {/* Mobile Header */}
-      <header className="lg:hidden fixed top-0 left-0 right-0 bg-white border-b border-gray-200 z-50">
+      <header className="lg:hidden fixed top-0 left-0 right-0 bg-white border-b border-gray-200 z-50" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
         <div className="flex items-center justify-between px-4 py-3">
           <Link to={createPageUrl("Dashboard")} className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center">
@@ -84,13 +85,20 @@ export default function Layout({ children, currentPageName }) {
             </div>
             <span className="font-bold text-gray-800">Critter Log</span>
           </Link>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          >
-            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Link to={createPageUrl("Profile")}>
+              <Button variant="ghost" size="icon">
+                <User className="w-5 h-5" />
+              </Button>
+            </Link>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            >
+              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </Button>
+          </div>
         </div>
 
         {/* Mobile Menu */}
@@ -127,8 +135,32 @@ export default function Layout({ children, currentPageName }) {
         </AnimatePresence>
       </header>
 
+      {/* Mobile Bottom Navigation */}
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
+        <div className="flex items-center justify-around px-2 py-2">
+          {navItems.map((item) => {
+            const isActive = location.pathname === createPageUrl(item.page) || 
+                           (location.pathname === '/' && item.page === 'Dashboard');
+            return (
+              <Link
+                key={item.page}
+                to={createPageUrl(item.page)}
+                className={`flex flex-col items-center gap-1 px-4 py-2 rounded-lg transition-colors ${
+                  isActive 
+                    ? 'text-amber-600' 
+                    : 'text-gray-500'
+                }`}
+              >
+                <item.icon className={`w-6 h-6 ${isActive ? 'text-amber-600' : ''}`} />
+                <span className="text-xs font-medium">{item.name}</span>
+              </Link>
+            );
+          })}
+        </div>
+      </nav>
+
       {/* Main Content */}
-      <main className="lg:ml-64 pt-16 lg:pt-0 min-h-screen">
+      <main className="lg:ml-64 pt-16 lg:pt-0 pb-20 lg:pb-0 min-h-screen">
         {children}
       </main>
     </div>

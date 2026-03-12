@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ResponsiveSelect } from "@/components/ui/responsive-select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { base44 } from "@/api/base44Client";
 import { Loader2 } from "lucide-react";
@@ -79,20 +80,14 @@ export default function HealthRecordForm({ open, onClose, animalId, record, onSa
             
             <div className="space-y-2">
               <Label>Type *</Label>
-              <Select
+              <ResponsiveSelect
                 value={formData.type}
                 onValueChange={(value) => setFormData(prev => ({ ...prev, type: value }))}
+                placeholder="Select type"
+                options={recordTypes}
+                label="Record Type"
                 required
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select type" />
-                </SelectTrigger>
-                <SelectContent>
-                  {recordTypes.map(opt => (
-                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              />
             </div>
 
             <div className="space-y-2">

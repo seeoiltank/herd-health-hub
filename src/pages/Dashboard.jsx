@@ -1,9 +1,9 @@
-import React from 'react';
-import { useQuery } from "@tanstack/react-query";
+import React, { useState, useCallback } from 'react';
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { PawPrint, Heart, Syringe, AlertCircle, Plus, ArrowRight } from "lucide-react";
+import { PawPrint, Heart, Syringe, AlertCircle, Plus, ArrowRight, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { motion } from "framer-motion";
@@ -14,6 +14,9 @@ import RecentActivity from "@/components/dashboard/RecentActivity";
 import AnimalCard from "@/components/animals/AnimalCard";
 
 export default function Dashboard() {
+  const queryClient = useQueryClient();
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
   const { data: animals = [], isLoading: loadingAnimals } = useQuery({
     queryKey: ['animals'],
     queryFn: () => base44.entities.Animal.list('-created_date')
@@ -30,6 +33,16 @@ export default function Dashboard() {
   });
 
   const isLoading = loadingAnimals || loadingHealth || loadingVax;
+
+  const handleRefresh = useCallback(async () => {
+    setIsRefreshing(true);
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ['animals'] }),
+      queryClient.invalidateQueries({ queryKey: ['healthRecords'] }),
+      queryClient.invalidateQueries({ queryKey: ['vaccinations'] })
+    ]);
+    setTimeout(() => setIsRefreshing(false), 500);
+  }, [queryClient]);
 
   const healthyCount = animals.filter(a => a.status === 'healthy').length;
   const sickCount = animals.filter(a => ['sick', 'recovering', 'quarantine'].includes(a.status)).length;
@@ -57,12 +70,22 @@ export default function Dashboard() {
               </h1>
               <p className="text-gray-600 mt-1">Welcome back! Here's how your animals are doing 🌾</p>
             </div>
-            <Link to={createPageUrl("Animals")}>
-              <Button className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 shadow-lg shadow-orange-200">
-                <Plus className="w-4 h-4 mr-2" />
-                Add Animal
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={handleRefresh}
+                disabled={isRefreshing}
+              >
+                <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
               </Button>
-            </Link>
+              <Link to={createPageUrl("Animals")}>
+                <Button className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 shadow-lg shadow-orange-200">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Animal
+                </Button>
+              </Link>
+            </div>
           </div>
         </motion.div>
 

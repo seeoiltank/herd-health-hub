@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ResponsiveSelect } from "@/components/ui/responsive-select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { base44 } from "@/api/base44Client";
 import { Camera, Loader2, X } from "lucide-react";
@@ -122,20 +123,14 @@ export default function AnimalForm({ open, onClose, animal, onSave }) {
             
             <div className="space-y-2">
               <Label>Species *</Label>
-              <Select
+              <ResponsiveSelect
                 value={formData.species}
                 onValueChange={(value) => setFormData(prev => ({ ...prev, species: value }))}
+                placeholder="Select species"
+                options={speciesOptions}
+                label="Species"
                 required
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select species" />
-                </SelectTrigger>
-                <SelectContent>
-                  {speciesOptions.map(opt => (
-                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              />
             </div>
 
             <div className="space-y-2">
@@ -167,18 +162,16 @@ export default function AnimalForm({ open, onClose, animal, onSave }) {
 
             <div className="space-y-2">
               <Label>Gender</Label>
-              <Select
+              <ResponsiveSelect
                 value={formData.gender}
                 onValueChange={(value) => setFormData(prev => ({ ...prev, gender: value }))}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select gender" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="male">Male</SelectItem>
-                  <SelectItem value="female">Female</SelectItem>
-                </SelectContent>
-              </Select>
+                placeholder="Select gender"
+                options={[
+                  { value: "male", label: "Male" },
+                  { value: "female", label: "Female" }
+                ]}
+                label="Gender"
+              />
             </div>
 
             <div className="space-y-2">
@@ -193,21 +186,19 @@ export default function AnimalForm({ open, onClose, animal, onSave }) {
 
             <div className="space-y-2">
               <Label>Status</Label>
-              <Select
+              <ResponsiveSelect
                 value={formData.status}
                 onValueChange={(value) => setFormData(prev => ({ ...prev, status: value }))}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="healthy">✅ Healthy</SelectItem>
-                  <SelectItem value="sick">🤒 Sick</SelectItem>
-                  <SelectItem value="recovering">💊 Recovering</SelectItem>
-                  <SelectItem value="quarantine">🔒 Quarantine</SelectItem>
-                  <SelectItem value="deceased">🕊️ Deceased</SelectItem>
-                </SelectContent>
-              </Select>
+                placeholder="Select status"
+                options={[
+                  { value: "healthy", label: "✅ Healthy" },
+                  { value: "sick", label: "🤒 Sick" },
+                  { value: "recovering", label: "💊 Recovering" },
+                  { value: "quarantine", label: "🔒 Quarantine" },
+                  { value: "deceased", label: "🕊️ Deceased" }
+                ]}
+                label="Status"
+              />
             </div>
 
             <div className="space-y-2">

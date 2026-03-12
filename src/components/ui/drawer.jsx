@@ -1,5 +1,3 @@
-"use client"
-
 import * as React from "react"
 import { Drawer as DrawerPrimitive } from "vaul"
 
@@ -9,7 +7,9 @@ const Drawer = ({
   shouldScaleBackground = true,
   ...props
 }) => (
-  <DrawerPrimitive.Root shouldScaleBackground={shouldScaleBackground} {...props} />
+  <DrawerPrimitive.Root
+    shouldScaleBackground={shouldScaleBackground}
+    {...props} />
 )
 Drawer.displayName = "Drawer"
 
@@ -58,7 +58,9 @@ const DrawerFooter = ({
   className,
   ...props
 }) => (
-  <div className={cn("mt-auto flex flex-col gap-2 p-4", className)} {...props} />
+  <div
+    className={cn("mt-auto flex flex-col gap-2 p-4", className)}
+    {...props} />
 )
 DrawerFooter.displayName = "DrawerFooter"
 
