@@ -83,7 +83,7 @@ export default function Layout({ children, currentPageName }) {
               <span className="text-xl">🐄</span>
             </div>
             <div>
-              <h1 className="font-bold text-gray-800 text-lg">Critter Log</h1>
+              <h1 className="font-bold text-gray-800 text-lg">Herd Health Hub</h1>
               <p className="text-xs text-gray-500">Animal Health Manager</p>
             </div>
           </Link>
@@ -161,7 +161,7 @@ export default function Layout({ children, currentPageName }) {
                 <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center">
                   <span className="text-lg">🐄</span>
                 </div>
-                <span className="font-bold text-gray-800">Critter Log</span>
+                <span className="font-bold text-gray-800">Herd Health Hub</span>
               </Link>
               <div className="flex items-center gap-2">
                 <Link to={createPageUrl("Profile")}>
