@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,6 +20,7 @@ const recordTypes = [
 ];
 
 export default function HealthRecordForm({ open, onClose, animalId, record, onSave }) {
+  const queryClient = useQueryClient();
   const [formData, setFormData] = useState(record || {
     animal_id: animalId,
     date: new Date().toISOString().split('T')[0],
@@ -33,28 +35,43 @@ export default function HealthRecordForm({ open, onClose, animalId, record, onSa
     follow_up_date: "",
     cost: ""
   });
-  const [saving, setSaving] = useState(false);
 
-  const handleSubmit = async (e) => {
+  const mutation = useMutation({
+    mutationFn: (dataToSave) =>
+      record?.id
+        ? base44.entities.HealthRecord.update(record.id, dataToSave)
+        : base44.entities.HealthRecord.create(dataToSave),
+    onMutate: async (dataToSave) => {
+      await queryClient.cancelQueries({ queryKey: ['healthRecords'] });
+      const previous = queryClient.getQueryData(['healthRecords']);
+      queryClient.setQueryData(['healthRecords'], (old = []) =>
+        record?.id
+          ? old.map(r => r.id === record.id ? { ...r, ...dataToSave } : r)
+          : [{ ...dataToSave, id: `temp-${Date.now()}` }, ...old]
+      );
+      return { previous };
+    },
+    onError: (_err, _data, context) => {
+      if (context?.previous) queryClient.setQueryData(['healthRecords'], context.previous);
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['healthRecords'] });
+    },
+    onSuccess: () => {
+      onSave();
+      onClose();
+    }
+  });
+
+  const handleSubmit = (e) => {
     e.preventDefault();
-    setSaving(true);
-    
     const dataToSave = {
       ...formData,
       weight: formData.weight ? parseFloat(formData.weight) : null,
       temperature: formData.temperature ? parseFloat(formData.temperature) : null,
       cost: formData.cost ? parseFloat(formData.cost) : null
     };
-    
-    if (record?.id) {
-      await base44.entities.HealthRecord.update(record.id, dataToSave);
-    } else {
-      await base44.entities.HealthRecord.create(dataToSave);
-    }
-    
-    setSaving(false);
-    onSave();
-    onClose();
+    mutation.mutate(dataToSave);
   };
 
   return (
@@ -188,10 +205,10 @@ export default function HealthRecordForm({ open, onClose, animalId, record, onSa
             </Button>
             <Button 
               type="submit" 
-              disabled={saving}
+              disabled={mutation.isPending}
               className="bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-600 hover:to-emerald-600"
             >
-              {saving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              {mutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
               {record ? "Save Changes" : "Add Record"}
             </Button>
           </div>

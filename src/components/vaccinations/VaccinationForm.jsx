@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,6 +10,7 @@ import { base44 } from "@/api/base44Client";
 import { Loader2 } from "lucide-react";
 
 export default function VaccinationForm({ open, onClose, animalId, vaccination, onSave }) {
+  const queryClient = useQueryClient();
   const [formData, setFormData] = useState(vaccination || {
     animal_id: animalId,
     vaccine_name: "",
@@ -20,21 +22,37 @@ export default function VaccinationForm({ open, onClose, animalId, vaccination, 
     notes: "",
     status: "completed"
   });
-  const [saving, setSaving] = useState(false);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setSaving(true);
-    
-    if (vaccination?.id) {
-      await base44.entities.Vaccination.update(vaccination.id, formData);
-    } else {
-      await base44.entities.Vaccination.create(formData);
+  const mutation = useMutation({
+    mutationFn: (data) =>
+      vaccination?.id
+        ? base44.entities.Vaccination.update(vaccination.id, data)
+        : base44.entities.Vaccination.create(data),
+    onMutate: async (data) => {
+      await queryClient.cancelQueries({ queryKey: ['vaccinations'] });
+      const previous = queryClient.getQueryData(['vaccinations']);
+      queryClient.setQueryData(['vaccinations'], (old = []) =>
+        vaccination?.id
+          ? old.map(v => v.id === vaccination.id ? { ...v, ...data } : v)
+          : [{ ...data, id: `temp-${Date.now()}` }, ...old]
+      );
+      return { previous };
+    },
+    onError: (_err, _data, context) => {
+      if (context?.previous) queryClient.setQueryData(['vaccinations'], context.previous);
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['vaccinations'] });
+    },
+    onSuccess: () => {
+      onSave();
+      onClose();
     }
-    
-    setSaving(false);
-    onSave();
-    onClose();
+  });
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    mutation.mutate(formData);
   };
 
   return (
@@ -142,10 +160,10 @@ export default function VaccinationForm({ open, onClose, animalId, vaccination, 
             </Button>
             <Button 
               type="submit" 
-              disabled={saving}
+              disabled={mutation.isPending}
               className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600"
             >
-              {saving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              {mutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
               {vaccination ? "Save Changes" : "Add Vaccination"}
             </Button>
           </div>

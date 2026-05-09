@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { motion, AnimatePresence } from "framer-motion";
+import PullToRefresh from "@/components/PullToRefresh";
 
 import AnimalCard from "@/components/animals/AnimalCard";
 import AnimalForm from "@/components/animals/AnimalForm";
@@ -47,6 +48,7 @@ export default function Animals() {
   }, {});
 
   return (
+    <PullToRefresh onRefresh={handleRefresh}>
     <div className="min-h-screen bg-gradient-to-br from-amber-50 via-white to-orange-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
@@ -228,5 +230,6 @@ export default function Animals() {
         onSave={() => queryClient.invalidateQueries({ queryKey: ['animals'] })}
       />
     </div>
+    </PullToRefresh>
   );
 }

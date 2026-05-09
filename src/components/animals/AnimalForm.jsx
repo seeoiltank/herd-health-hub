@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -23,6 +24,7 @@ const speciesOptions = [
 ];
 
 export default function AnimalForm({ open, onClose, animal, onSave }) {
+  const queryClient = useQueryClient();
   const [formData, setFormData] = useState(animal || {
     name: "",
     species: "",
@@ -38,36 +40,50 @@ export default function AnimalForm({ open, onClose, animal, onSave }) {
     location: ""
   });
   const [uploading, setUploading] = useState(false);
-  const [saving, setSaving] = useState(false);
+
+  const mutation = useMutation({
+    mutationFn: (dataToSave) =>
+      animal?.id
+        ? base44.entities.Animal.update(animal.id, dataToSave)
+        : base44.entities.Animal.create(dataToSave),
+    onMutate: async (dataToSave) => {
+      await queryClient.cancelQueries({ queryKey: ['animals'] });
+      const previous = queryClient.getQueryData(['animals']);
+      queryClient.setQueryData(['animals'], (old = []) =>
+        animal?.id
+          ? old.map(a => a.id === animal.id ? { ...a, ...dataToSave } : a)
+          : [{ ...dataToSave, id: `temp-${Date.now()}` }, ...old]
+      );
+      return { previous };
+    },
+    onError: (_err, _data, context) => {
+      if (context?.previous) queryClient.setQueryData(['animals'], context.previous);
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['animals'] });
+    },
+    onSuccess: () => {
+      onSave();
+      onClose();
+    }
+  });
 
   const handlePhotoUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    
     setUploading(true);
     const { file_url } = await base44.integrations.Core.UploadFile({ file });
     setFormData(prev => ({ ...prev, photo_url: file_url }));
     setUploading(false);
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    setSaving(true);
-    
     const dataToSave = {
       ...formData,
       weight: formData.weight ? parseFloat(formData.weight) : null
     };
-    
-    if (animal?.id) {
-      await base44.entities.Animal.update(animal.id, dataToSave);
-    } else {
-      await base44.entities.Animal.create(dataToSave);
-    }
-    
-    setSaving(false);
-    onSave();
-    onClose();
+    mutation.mutate(dataToSave);
   };
 
   return (
@@ -236,10 +252,10 @@ export default function AnimalForm({ open, onClose, animal, onSave }) {
             </Button>
             <Button 
               type="submit" 
-              disabled={saving}
+              disabled={mutation.isPending}
               className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600"
             >
-              {saving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              {mutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
               {animal ? "Save Changes" : "Add Animal"}
             </Button>
           </div>

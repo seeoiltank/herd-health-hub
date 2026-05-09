@@ -4,17 +4,38 @@ import { base44 } from "@/api/base44Client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { User, Mail, Shield, Trash2, LogOut } from "lucide-react";
+import { User, Mail, Shield, Trash2, LogOut, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 export default function Profile() {
+  const [deleting, setDeleting] = useState(false);
+
   const { data: user } = useQuery({
     queryKey: ['currentUser'],
     queryFn: () => base44.auth.me()
   });
 
   const handleDeleteAccount = async () => {
-    toast.error("Account deletion must be processed by an administrator. Please contact support.");
+    setDeleting(true);
+    try {
+      // Attempt actual deletion; fall back to logging a deletion request event
+      if (base44.entities.User?.delete && user?.id) {
+        await base44.entities.User.delete(user.id);
+        toast.success("Account deleted. You will be logged out.");
+        setTimeout(() => base44.auth.logout(), 1500);
+      } else {
+        // Log deletion_request event via analytics
+        base44.analytics.track({
+          eventName: "deletion_request",
+          properties: { email: user?.email ?? "" }
+        });
+        toast.info("Deletion request submitted. An administrator will process it shortly.");
+      }
+    } catch {
+      toast.error("Could not process deletion. Please contact support.");
+    } finally {
+      setDeleting(false);
+    }
   };
 
   const handleLogout = () => {
@@ -95,7 +116,8 @@ export default function Profile() {
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleDeleteAccount} className="bg-red-600 hover:bg-red-700">
+                  <AlertDialogAction onClick={handleDeleteAccount} disabled={deleting} className="bg-red-600 hover:bg-red-700">
+                    {deleting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                     Delete Account
                   </AlertDialogAction>
                 </AlertDialogFooter>

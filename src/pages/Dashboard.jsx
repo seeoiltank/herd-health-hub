@@ -7,6 +7,7 @@ import { PawPrint, Heart, Syringe, AlertCircle, Plus, ArrowRight, RefreshCw } fr
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { motion } from "framer-motion";
+import PullToRefresh from "@/components/PullToRefresh";
 
 import StatsCard from "@/components/dashboard/StatsCard";
 import UpcomingVaccinations from "@/components/dashboard/UpcomingVaccinations";
@@ -55,6 +56,7 @@ export default function Dashboard() {
   ];
 
   return (
+    <PullToRefresh onRefresh={handleRefresh}>
     <div className="min-h-screen bg-gradient-to-br from-amber-50 via-white to-orange-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
@@ -169,5 +171,6 @@ export default function Dashboard() {
         </motion.div>
       </div>
     </div>
+    </PullToRefresh>
   );
 }
