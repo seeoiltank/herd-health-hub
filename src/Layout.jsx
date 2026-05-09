@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import { Link, useLocation } from "react-router-dom";
+import React, { useState, useRef, useEffect } from 'react';
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { 
-  Home, PawPrint, Syringe, Stethoscope, Menu, X, User
+  Home, PawPrint, Syringe, Stethoscope, Menu, X, User, ChevronLeft
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
@@ -14,9 +14,64 @@ const navItems = [
   { name: "Health Records", icon: Stethoscope, page: "HealthRecords" },
 ];
 
+// Pages that are considered "root" tab pages
+const ROOT_PAGES = navItems.map(item => createPageUrl(item.page));
+const isRootPage = (pathname) =>
+  pathname === '/' || ROOT_PAGES.includes(pathname);
+
+// Derive a human-readable title from the page name
+const PAGE_TITLES = {
+  AnimalDetail: "Animal Detail",
+  Profile: "Profile",
+};
+
+function getPageTitle(currentPageName) {
+  return PAGE_TITLES[currentPageName] || currentPageName?.replace(/([A-Z])/g, ' $1').trim() || "";
+}
+
 export default function Layout({ children, currentPageName }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+
+  // Tab history: maps page key → last visited path
+  const tabHistory = useRef(
+    Object.fromEntries(navItems.map(item => [item.page, createPageUrl(item.page)]))
+  );
+
+  // Update tab history whenever path changes — only track root-owned paths
+  useEffect(() => {
+    const path = location.pathname;
+    // Find which tab "owns" the current page based on currentPageName
+    const owningTab = navItems.find(item => item.page === currentPageName);
+    if (owningTab) {
+      tabHistory.current[owningTab.page] = path;
+    }
+  }, [location.pathname, currentPageName]);
+
+  // Determine if we're on a child (non-root) page
+  const isChildPage = !isRootPage(location.pathname);
+
+  // Find the active tab key (root-level match)
+  const activeTabPage = navItems.find(item =>
+    location.pathname === createPageUrl(item.page) ||
+    (location.pathname === '/' && item.page === 'Dashboard') ||
+    currentPageName === item.page
+  )?.page;
+
+  const handleTabClick = (item) => {
+    setMobileMenuOpen(false);
+    const rootPath = createPageUrl(item.page);
+    if (activeTabPage === item.page) {
+      // Already on this tab — go to root and scroll to top
+      navigate(rootPath);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      // Navigate to last-seen path for this tab
+      const dest = tabHistory.current[item.page] || rootPath;
+      navigate(dest);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
@@ -77,33 +132,58 @@ export default function Layout({ children, currentPageName }) {
       </aside>
 
       {/* Mobile Header */}
-      <header className="lg:hidden fixed top-0 left-0 right-0 bg-white border-b border-gray-200 z-50" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
-        <div className="flex items-center justify-between px-4 py-3">
-          <Link to={createPageUrl("Dashboard")} className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center">
-              <span className="text-lg">🐄</span>
-            </div>
-            <span className="font-bold text-gray-800">Critter Log</span>
-          </Link>
-          <div className="flex items-center gap-2">
-            <Link to={createPageUrl("Profile")}>
-              <Button variant="ghost" size="icon">
-                <User className="w-5 h-5" />
+      <header
+        className="lg:hidden fixed top-0 left-0 right-0 bg-white border-b border-gray-200 z-50"
+        style={{ paddingTop: 'env(safe-area-inset-top)' }}
+      >
+        <div className="flex items-center justify-between px-4 py-3 h-14">
+          {isChildPage ? (
+            /* Child page: Back button + page title */
+            <>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => navigate(-1)}
+                className="-ml-2"
+              >
+                <ChevronLeft className="w-6 h-6" />
               </Button>
-            </Link>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            >
-              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-            </Button>
-          </div>
+              <span className="font-semibold text-gray-800 text-base absolute left-1/2 -translate-x-1/2">
+                {getPageTitle(currentPageName)}
+              </span>
+              {/* Placeholder to balance flex layout */}
+              <div className="w-9" />
+            </>
+          ) : (
+            /* Root page: logo + profile + menu */
+            <>
+              <Link to={createPageUrl("Dashboard")} className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center">
+                  <span className="text-lg">🐄</span>
+                </div>
+                <span className="font-bold text-gray-800">Critter Log</span>
+              </Link>
+              <div className="flex items-center gap-2">
+                <Link to={createPageUrl("Profile")}>
+                  <Button variant="ghost" size="icon">
+                    <User className="w-5 h-5" />
+                  </Button>
+                </Link>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                >
+                  {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+                </Button>
+              </div>
+            </>
+          )}
         </div>
 
-        {/* Mobile Menu */}
+        {/* Mobile Menu (only on root pages) */}
         <AnimatePresence>
-          {mobileMenuOpen && (
+          {mobileMenuOpen && !isChildPage && (
             <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
@@ -114,11 +194,10 @@ export default function Layout({ children, currentPageName }) {
                 {navItems.map((item) => {
                   const isActive = currentPageName === item.page;
                   return (
-                    <Link
+                    <button
                       key={item.page}
-                      to={createPageUrl(item.page)}
-                      onClick={() => setMobileMenuOpen(false)}
-                      className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                      onClick={() => handleTabClick(item)}
+                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
                         isActive 
                           ? 'bg-amber-50 text-amber-700 font-medium' 
                           : 'text-gray-600 hover:bg-gray-50'
@@ -126,7 +205,7 @@ export default function Layout({ children, currentPageName }) {
                     >
                       <item.icon className="w-5 h-5" />
                       {item.name}
-                    </Link>
+                    </button>
                   );
                 })}
               </nav>
@@ -136,24 +215,24 @@ export default function Layout({ children, currentPageName }) {
       </header>
 
       {/* Mobile Bottom Navigation */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50 select-none" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
+      <nav
+        className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50 select-none"
+        style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+      >
         <div className="flex items-center justify-around px-2 py-2">
           {navItems.map((item) => {
-            const isActive = location.pathname === createPageUrl(item.page) || 
-                           (location.pathname === '/' && item.page === 'Dashboard');
+            const isActive = activeTabPage === item.page;
             return (
-              <Link
+              <button
                 key={item.page}
-                to={createPageUrl(item.page)}
+                onClick={() => handleTabClick(item)}
                 className={`flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-colors select-none ${
-                  isActive 
-                    ? 'text-amber-600' 
-                    : 'text-gray-500'
+                  isActive ? 'text-amber-600' : 'text-gray-500'
                 }`}
               >
                 <item.icon className={`w-5 h-5 ${isActive ? 'text-amber-600' : ''}`} />
                 <span className="text-[10px] font-medium">{item.name}</span>
-              </Link>
+              </button>
             );
           })}
         </div>
