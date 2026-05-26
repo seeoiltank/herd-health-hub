@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,7 +11,7 @@ import { Loader2 } from "lucide-react";
 
 export default function VaccinationForm({ open, onClose, animalId, vaccination, onSave }) {
   const queryClient = useQueryClient();
-  const [formData, setFormData] = useState(vaccination || {
+  const emptyFormData = {
     animal_id: animalId,
     vaccine_name: "",
     date_given: new Date().toISOString().split('T')[0],
@@ -21,7 +21,14 @@ export default function VaccinationForm({ open, onClose, animalId, vaccination, 
     dosage: "",
     notes: "",
     status: "completed"
-  });
+  };
+  const [formData, setFormData] = useState(vaccination || emptyFormData);
+
+  useEffect(() => {
+    if (open) {
+      setFormData(vaccination || { ...emptyFormData, animal_id: animalId });
+    }
+  }, [open, vaccination, animalId]);
 
   const mutation = useMutation({
     mutationFn: (data) =>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Link } from "react-router-dom";
@@ -35,18 +35,26 @@ export default function HealthRecords() {
     queryFn: () => base44.entities.HealthRecord.list('-date')
   });
 
-  const getAnimalName = (animalId) => {
-    const animal = animals.find(a => a.id === animalId);
-    return animal?.name || "Unknown";
-  };
+  const animalNameById = useMemo(
+    () => new Map(animals.map((animal) => [animal.id, animal.name || "Unknown"])),
+    [animals]
+  );
 
-  const filteredRecords = healthRecords.filter(record => {
-    const matchesType = typeFilter === "all" || record.type === typeFilter;
-    const matchesSearch = record.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      getAnimalName(record.animal_id).toLowerCase().includes(searchQuery.toLowerCase()) ||
-      record.medication?.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesType && matchesSearch;
-  });
+  const getAnimalName = (animalId) => animalNameById.get(animalId) || "Unknown";
+
+  const searchLower = searchQuery.toLowerCase();
+  const filteredRecords = useMemo(
+    () =>
+      healthRecords.filter((record) => {
+        const matchesType = typeFilter === "all" || record.type === typeFilter;
+        const matchesSearch =
+          (record.description || "").toLowerCase().includes(searchLower) ||
+          getAnimalName(record.animal_id).toLowerCase().includes(searchLower) ||
+          record.medication?.toLowerCase().includes(searchLower);
+        return matchesType && matchesSearch;
+      }),
+    [healthRecords, typeFilter, searchLower, animalNameById]
+  );
 
   const totalCost = healthRecords.reduce((sum, r) => sum + (r.cost || 0), 0);
 
