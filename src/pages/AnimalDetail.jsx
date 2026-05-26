@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { format } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
@@ -10,7 +10,7 @@ import {
   Scale, Tag, Syringe, Stethoscope, AlertTriangle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -50,6 +50,7 @@ const recordTypeIcons = {
 export default function AnimalDetail() {
   const urlParams = new URLSearchParams(window.location.search);
   const animalId = urlParams.get("id");
+  const navigate = useNavigate();
 
   const [showEditForm, setShowEditForm] = useState(false);
   const [showHealthForm, setShowHealthForm] = useState(false);
@@ -82,7 +83,7 @@ export default function AnimalDetail() {
 
   const handleDelete = async () => {
     await base44.entities.Animal.delete(animalId);
-    window.location.href = createPageUrl("Animals");
+    navigate(createPageUrl("Animals"));
   };
 
   const refreshData = () => {

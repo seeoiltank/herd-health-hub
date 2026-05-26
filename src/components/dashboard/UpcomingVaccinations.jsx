@@ -1,19 +1,25 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, AlertTriangle } from "lucide-react";
 import { format, isPast, differenceInDays } from "date-fns";
 
 export default function UpcomingVaccinations({ vaccinations, animals }) {
-  const getAnimalName = (animalId) => {
-    const animal = animals.find(a => a.id === animalId);
-    return animal?.name || "Unknown";
-  };
+  const animalNameById = useMemo(
+    () => new Map(animals.map((animal) => [animal.id, animal.name || "Unknown"])),
+    [animals]
+  );
 
-  const upcomingVaccinations = vaccinations
-    .filter(v => v.next_due_date)
-    .sort((a, b) => new Date(a.next_due_date) - new Date(b.next_due_date))
-    .slice(0, 5);
+  const getAnimalName = (animalId) => animalNameById.get(animalId) || "Unknown";
+
+  const upcomingVaccinations = useMemo(
+    () =>
+      vaccinations
+        .filter((v) => v.next_due_date)
+        .sort((a, b) => new Date(a.next_due_date) - new Date(b.next_due_date))
+        .slice(0, 5),
+    [vaccinations]
+  );
 
   return (
     <Card className="border-0 shadow-lg">

@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Plus, Search, Filter, Grid3X3, List, RefreshCw } from "lucide-react";
@@ -33,19 +33,29 @@ export default function Animals() {
     setTimeout(() => setIsRefreshing(false), 500);
   }, [queryClient]);
 
-  const filteredAnimals = animals.filter(animal => {
-    const matchesSearch = animal.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      animal.tag_number?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      animal.breed?.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesSpecies = speciesFilter === "all" || animal.species === speciesFilter;
-    const matchesStatus = statusFilter === "all" || animal.status === statusFilter;
-    return matchesSearch && matchesSpecies && matchesStatus;
-  });
+  const searchLower = searchQuery.toLowerCase();
+  const filteredAnimals = useMemo(
+    () =>
+      animals.filter((animal) => {
+        const matchesSearch =
+          (animal.name || "").toLowerCase().includes(searchLower) ||
+          animal.tag_number?.toLowerCase().includes(searchLower) ||
+          animal.breed?.toLowerCase().includes(searchLower);
+        const matchesSpecies = speciesFilter === "all" || animal.species === speciesFilter;
+        const matchesStatus = statusFilter === "all" || animal.status === statusFilter;
+        return matchesSearch && matchesSpecies && matchesStatus;
+      }),
+    [animals, searchLower, speciesFilter, statusFilter]
+  );
 
-  const speciesCounts = animals.reduce((acc, animal) => {
-    acc[animal.species] = (acc[animal.species] || 0) + 1;
-    return acc;
-  }, {});
+  const speciesCounts = useMemo(
+    () =>
+      animals.reduce((acc, animal) => {
+        acc[animal.species] = (acc[animal.species] || 0) + 1;
+        return acc;
+      }, {}),
+    [animals]
+  );
 
   return (
     <PullToRefresh onRefresh={handleRefresh}>

@@ -1,14 +1,13 @@
-import React, { useState } from 'react';
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import React, { useMemo, useState } from 'react';
+import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { format, isPast, differenceInDays, addDays } from "date-fns";
+import { format, isPast, differenceInDays } from "date-fns";
 import { motion } from "framer-motion";
 import { Syringe, Calendar, AlertTriangle, CheckCircle, Clock, Filter, Search } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -27,10 +26,12 @@ export default function Vaccinations() {
     queryFn: () => base44.entities.Vaccination.list('-date_given')
   });
 
-  const getAnimalName = (animalId) => {
-    const animal = animals.find(a => a.id === animalId);
-    return animal?.name || "Unknown";
-  };
+  const animalNameById = useMemo(
+    () => new Map(animals.map((animal) => [animal.id, animal.name || "Unknown"])),
+    [animals]
+  );
+
+  const getAnimalName = (animalId) => animalNameById.get(animalId) || "Unknown";
 
   const getVaccinationStatus = (vax) => {
     if (!vax.next_due_date) return 'completed';
@@ -40,16 +41,28 @@ export default function Vaccinations() {
     return 'completed';
   };
 
-  const filteredVaccinations = vaccinations.filter(vax => {
-    const status = getVaccinationStatus(vax);
-    const matchesStatus = statusFilter === "all" || status === statusFilter;
-    const matchesSearch = vax.vaccine_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      getAnimalName(vax.animal_id).toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesStatus && matchesSearch;
-  });
+  const searchLower = searchQuery.toLowerCase();
+  const filteredVaccinations = useMemo(
+    () =>
+      vaccinations.filter((vax) => {
+        const status = getVaccinationStatus(vax);
+        const matchesStatus = statusFilter === "all" || status === statusFilter;
+        const matchesSearch =
+          (vax.vaccine_name || "").toLowerCase().includes(searchLower) ||
+          getAnimalName(vax.animal_id).toLowerCase().includes(searchLower);
+        return matchesStatus && matchesSearch;
+      }),
+    [vaccinations, statusFilter, searchLower, animalNameById]
+  );
 
-  const overdueCount = vaccinations.filter(v => getVaccinationStatus(v) === 'overdue').length;
-  const upcomingCount = vaccinations.filter(v => getVaccinationStatus(v) === 'upcoming').length;
+  const overdueCount = useMemo(
+    () => vaccinations.filter((v) => getVaccinationStatus(v) === 'overdue').length,
+    [vaccinations]
+  );
+  const upcomingCount = useMemo(
+    () => vaccinations.filter((v) => getVaccinationStatus(v) === 'upcoming').length,
+    [vaccinations]
+  );
 
   const isLoading = loadingAnimals || loadingVax;
 

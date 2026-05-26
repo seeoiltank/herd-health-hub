@@ -1,35 +1,41 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Activity, Syringe, Stethoscope } from "lucide-react";
 import { format } from "date-fns";
 
 export default function RecentActivity({ healthRecords, vaccinations, animals }) {
-  const getAnimalName = (animalId) => {
-    const animal = animals.find(a => a.id === animalId);
-    return animal?.name || "Unknown";
-  };
+  const animalNameById = useMemo(
+    () => new Map(animals.map((animal) => [animal.id, animal.name || "Unknown"])),
+    [animals]
+  );
+
+  const getAnimalName = (animalId) => animalNameById.get(animalId) || "Unknown";
 
   // Combine and sort all activities
-  const activities = [
-    ...healthRecords.map(r => ({
-      id: r.id,
-      type: 'health',
-      date: r.date,
-      title: r.type,
-      animal: getAnimalName(r.animal_id),
-      description: r.description
-    })),
-    ...vaccinations.map(v => ({
-      id: v.id,
-      type: 'vaccination',
-      date: v.date_given,
-      title: v.vaccine_name,
-      animal: getAnimalName(v.animal_id),
-      description: `Vaccination administered`
-    }))
-  ]
-    .sort((a, b) => new Date(b.date) - new Date(a.date))
-    .slice(0, 5);
+  const activities = useMemo(
+    () =>
+      [
+        ...healthRecords.map((r) => ({
+          id: r.id,
+          type: 'health',
+          date: r.date,
+          title: r.type,
+          animal: getAnimalName(r.animal_id),
+          description: r.description
+        })),
+        ...vaccinations.map((v) => ({
+          id: v.id,
+          type: 'vaccination',
+          date: v.date_given,
+          title: v.vaccine_name,
+          animal: getAnimalName(v.animal_id),
+          description: 'Vaccination administered'
+        }))
+      ]
+        .sort((a, b) => new Date(b.date) - new Date(a.date))
+        .slice(0, 5),
+    [healthRecords, vaccinations, animalNameById]
+  );
 
   return (
     <Card className="border-0 shadow-lg">

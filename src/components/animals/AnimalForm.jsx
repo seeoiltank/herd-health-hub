@@ -1,10 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ResponsiveSelect } from "@/components/ui/responsive-select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { base44 } from "@/api/base44Client";
@@ -25,7 +24,7 @@ const speciesOptions = [
 
 export default function AnimalForm({ open, onClose, animal, onSave }) {
   const queryClient = useQueryClient();
-  const [formData, setFormData] = useState(animal || {
+  const emptyFormData = {
     name: "",
     species: "",
     breed: "",
@@ -38,8 +37,15 @@ export default function AnimalForm({ open, onClose, animal, onSave }) {
     notes: "",
     acquisition_date: "",
     location: ""
-  });
+  };
+  const [formData, setFormData] = useState(animal || emptyFormData);
   const [uploading, setUploading] = useState(false);
+
+  useEffect(() => {
+    if (open) {
+      setFormData(animal || emptyFormData);
+    }
+  }, [open, animal]);
 
   const mutation = useMutation({
     mutationFn: (dataToSave) =>
@@ -71,10 +77,13 @@ export default function AnimalForm({ open, onClose, animal, onSave }) {
   const handlePhotoUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    setUploading(true);
-    const { file_url } = await base44.integrations.Core.UploadFile({ file });
-    setFormData(prev => ({ ...prev, photo_url: file_url }));
-    setUploading(false);
+    try {
+      setUploading(true);
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      setFormData(prev => ({ ...prev, photo_url: file_url }));
+    } finally {
+      setUploading(false);
+    }
   };
 
   const handleSubmit = (e) => {

@@ -1,10 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ResponsiveSelect } from "@/components/ui/responsive-select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { base44 } from "@/api/base44Client";
@@ -21,7 +20,7 @@ const recordTypes = [
 
 export default function HealthRecordForm({ open, onClose, animalId, record, onSave }) {
   const queryClient = useQueryClient();
-  const [formData, setFormData] = useState(record || {
+  const emptyFormData = {
     animal_id: animalId,
     date: new Date().toISOString().split('T')[0],
     type: "",
@@ -34,7 +33,14 @@ export default function HealthRecordForm({ open, onClose, animalId, record, onSa
     vet_name: "",
     follow_up_date: "",
     cost: ""
-  });
+  };
+  const [formData, setFormData] = useState(record || emptyFormData);
+
+  useEffect(() => {
+    if (open) {
+      setFormData(record || { ...emptyFormData, animal_id: animalId });
+    }
+  }, [open, record, animalId]);
 
   const mutation = useMutation({
     mutationFn: (dataToSave) =>
