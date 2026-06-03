@@ -45,21 +45,7 @@ Core features currently implemented in this repository:
 
 ## Screenshots
 
-Add screenshots to a folder (recommended: `docs/screenshots/`) and reference them here.
-
-Example placeholders (create these files and update names as needed):
-
-- `docs/screenshots/dashboard.png`
-- `docs/screenshots/animals.png`
-- `docs/screenshots/animal-detail.png`
-- `docs/screenshots/vaccinations.png`
-- `docs/screenshots/health-records.png`
-
-Then embed them like:
-
-```md
 ![Dashboard](docs/screenshots/dashboard.png)
-```
 
 ## Running locally
 
