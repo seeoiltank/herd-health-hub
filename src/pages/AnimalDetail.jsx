@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Link, useNavigate } from "react-router-dom";
-import { createPageUrl } from "@/utils";
-import { format } from "date-fns";
+import { createPageUrl, formatDate } from "@/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   ArrowLeft, Edit2, Trash2, Plus, Calendar, MapPin, 
@@ -308,7 +307,7 @@ export default function AnimalDetail() {
                                 </div>
                                 <div className="text-right">
                                   <p className="text-sm text-gray-500">
-                                    {format(new Date(record.date), 'MMM d, yyyy')}
+                                    {formatDate(record.date, 'MMM d, yyyy')}
                                   </p>
                                   {record.cost && (
                                     <p className="text-xs text-gray-400">${record.cost}</p>
@@ -371,12 +370,12 @@ export default function AnimalDetail() {
                                   </div>
                                   <div className="text-right">
                                     <p className="text-sm text-gray-500">
-                                      {format(new Date(vax.date_given), 'MMM d, yyyy')}
+                                      {formatDate(vax.date_given, 'MMM d, yyyy')}
                                     </p>
                                     {vax.next_due_date && (
                                       <Badge className={isOverdue ? 'bg-red-100 text-red-700 mt-1' : 'bg-blue-100 text-blue-700 mt-1'}>
                                         {isOverdue && <AlertTriangle className="w-3 h-3 mr-1" />}
-                                        Next: {format(new Date(vax.next_due_date), 'MMM d')}
+                                        Next: {formatDate(vax.next_due_date, 'MMM d')}
                                       </Badge>
                                     )}
                                   </div>

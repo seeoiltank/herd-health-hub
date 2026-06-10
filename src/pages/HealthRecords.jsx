@@ -2,8 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Link } from "react-router-dom";
-import { createPageUrl } from "@/utils";
-import { format } from "date-fns";
+import { createPageUrl, formatDate } from "@/utils";
 import { motion } from "framer-motion";
 import { Stethoscope, Search, Filter, DollarSign, Calendar } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -182,7 +181,7 @@ export default function HealthRecords() {
                             
                             <div className="text-sm text-gray-500 flex items-center gap-1 whitespace-nowrap">
                               <Calendar className="w-4 h-4" />
-                              {format(new Date(record.date), 'MMM d, yyyy')}
+                              {formatDate(record.date, 'MMM d, yyyy')}
                             </div>
                           </div>
                           
@@ -203,7 +202,7 @@ export default function HealthRecords() {
                             {record.cost && <span className="text-emerald-600 font-medium">💵 ${record.cost}</span>}
                             {record.follow_up_date && (
                               <span className="text-amber-600">
-                                📅 Follow-up: {format(new Date(record.follow_up_date), 'MMM d')}
+                                📅 Follow-up: {formatDate(record.follow_up_date, 'MMM d')}
                               </span>
                             )}
                           </div>
