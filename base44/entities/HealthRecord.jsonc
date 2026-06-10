@@ -1,0 +1,70 @@
+{
+  "name": "HealthRecord",
+  "type": "object",
+  "properties": {
+    "animal_id": {
+      "type": "string",
+      "description": "Reference to the animal"
+    },
+    "date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date of the health record"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "checkup",
+        "illness",
+        "injury",
+        "treatment",
+        "surgery",
+        "observation"
+      ],
+      "description": "Type of health record"
+    },
+    "description": {
+      "type": "string",
+      "description": "Details about the health event"
+    },
+    "weight": {
+      "type": "number",
+      "description": "Weight at time of record (lbs)"
+    },
+    "temperature": {
+      "type": "number",
+      "description": "Body temperature (\u00b0F)"
+    },
+    "symptoms": {
+      "type": "string",
+      "description": "Any symptoms observed"
+    },
+    "treatment": {
+      "type": "string",
+      "description": "Treatment administered"
+    },
+    "medication": {
+      "type": "string",
+      "description": "Medication given"
+    },
+    "vet_name": {
+      "type": "string",
+      "description": "Name of veterinarian if applicable"
+    },
+    "follow_up_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date for follow-up if needed"
+    },
+    "cost": {
+      "type": "number",
+      "description": "Cost of treatment/visit"
+    }
+  },
+  "required": [
+    "animal_id",
+    "date",
+    "type",
+    "description"
+  ]
+}

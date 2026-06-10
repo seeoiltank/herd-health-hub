@@ -1,0 +1,55 @@
+{
+  "name": "Vaccination",
+  "type": "object",
+  "properties": {
+    "animal_id": {
+      "type": "string",
+      "description": "Reference to the animal"
+    },
+    "vaccine_name": {
+      "type": "string",
+      "description": "Name of the vaccine"
+    },
+    "date_given": {
+      "type": "string",
+      "format": "date",
+      "description": "Date vaccination was administered"
+    },
+    "next_due_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date next vaccination is due"
+    },
+    "batch_number": {
+      "type": "string",
+      "description": "Batch/lot number of the vaccine"
+    },
+    "administered_by": {
+      "type": "string",
+      "description": "Person who administered the vaccine"
+    },
+    "dosage": {
+      "type": "string",
+      "description": "Dosage given"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Additional notes"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "completed",
+        "scheduled",
+        "overdue"
+      ],
+      "default": "completed",
+      "description": "Status of the vaccination"
+    }
+  },
+  "required": [
+    "animal_id",
+    "vaccine_name",
+    "date_given"
+  ]
+}

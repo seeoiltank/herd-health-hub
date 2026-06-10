@@ -1,0 +1,84 @@
+{
+  "name": "Animal",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Name of the animal"
+    },
+    "species": {
+      "type": "string",
+      "enum": [
+        "cow",
+        "pig",
+        "chicken",
+        "goat",
+        "sheep",
+        "horse",
+        "duck",
+        "turkey",
+        "rabbit",
+        "other"
+      ],
+      "description": "Type of animal"
+    },
+    "breed": {
+      "type": "string",
+      "description": "Breed of the animal"
+    },
+    "tag_number": {
+      "type": "string",
+      "description": "Identification tag or ear tag number"
+    },
+    "date_of_birth": {
+      "type": "string",
+      "format": "date",
+      "description": "Birth date of the animal"
+    },
+    "gender": {
+      "type": "string",
+      "enum": [
+        "male",
+        "female"
+      ],
+      "description": "Gender of the animal"
+    },
+    "weight": {
+      "type": "number",
+      "description": "Current weight in pounds"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "healthy",
+        "sick",
+        "recovering",
+        "quarantine",
+        "deceased"
+      ],
+      "default": "healthy",
+      "description": "Current health status"
+    },
+    "photo_url": {
+      "type": "string",
+      "description": "Photo of the animal"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Additional notes about the animal"
+    },
+    "acquisition_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date animal was acquired"
+    },
+    "location": {
+      "type": "string",
+      "description": "Barn, pasture, or pen location"
+    }
+  },
+  "required": [
+    "name",
+    "species"
+  ]
+}
