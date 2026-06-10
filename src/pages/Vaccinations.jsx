@@ -2,8 +2,8 @@ import React, { useMemo, useState } from 'react';
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Link } from "react-router-dom";
-import { createPageUrl } from "@/utils";
-import { format, isPast, differenceInDays } from "date-fns";
+import { createPageUrl, formatDate } from "@/utils";
+import { isPast, differenceInDays } from "date-fns";
 import { motion } from "framer-motion";
 import { Syringe, Calendar, AlertTriangle, CheckCircle, Clock, Filter, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -246,7 +246,7 @@ export default function Vaccinations() {
                         <div className="flex flex-wrap items-center gap-3">
                           <div className="text-sm text-gray-500">
                             <Calendar className="w-4 h-4 inline mr-1" />
-                            Given: {format(new Date(vax.date_given), 'MMM d, yyyy')}
+                            Given: {formatDate(vax.date_given, 'MMM d, yyyy')}
                           </div>
                           
                           {vax.next_due_date && (
@@ -260,7 +260,7 @@ export default function Vaccinations() {
                               ) : status === 'upcoming' ? (
                                 <><Clock className="w-3 h-3 mr-1" /> Due in {daysUntilDue} days</>
                               ) : (
-                                <><CheckCircle className="w-3 h-3 mr-1" /> Next: {format(new Date(vax.next_due_date), 'MMM d')}</>
+                                <><CheckCircle className="w-3 h-3 mr-1" /> Next: {formatDate(vax.next_due_date, 'MMM d')}</>
                               )}
                             </Badge>
                           )}

@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Activity, Syringe, Stethoscope } from "lucide-react";
-import { format } from "date-fns";
+import { formatDate } from "@/utils";
 
 export default function RecentActivity({ healthRecords, vaccinations, animals }) {
   const animalNameById = useMemo(
@@ -68,9 +68,9 @@ export default function RecentActivity({ healthRecords, vaccinations, animals })
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between">
-                    <p className="font-medium text-gray-800 capitalize">{activity.title.replace(/_/g, ' ')}</p>
+                    <p className="font-medium text-gray-800 capitalize">{(activity.title || '').replace(/_/g, ' ')}</p>
                     <span className="text-xs text-gray-500">
-                      {format(new Date(activity.date), 'MMM d')}
+                      {formatDate(activity.date, 'MMM d')}
                     </span>
                   </div>
                   <p className="text-sm text-gray-600">{activity.animal}</p>

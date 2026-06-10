@@ -2,7 +2,8 @@ import React, { useMemo } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, AlertTriangle } from "lucide-react";
-import { format, isPast, differenceInDays } from "date-fns";
+import { isPast, differenceInDays } from "date-fns";
+import { formatDate } from "@/utils";
 
 export default function UpcomingVaccinations({ vaccinations, animals }) {
   const animalNameById = useMemo(
@@ -71,7 +72,7 @@ export default function UpcomingVaccinations({ vaccinations, animals }) {
                         )}
                       </Badge>
                       <p className="text-xs text-gray-500 mt-1">
-                        {format(new Date(vax.next_due_date), 'MMM d, yyyy')}
+                        {formatDate(vax.next_due_date, 'MMM d, yyyy')}
                       </p>
                     </div>
                   </div>
