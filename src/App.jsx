@@ -3,6 +3,7 @@ import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
 import NavigationTracker from '@/lib/NavigationTracker'
 import { pagesConfig } from './pages.config'
+import { useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
@@ -27,17 +28,22 @@ const AuthenticatedApp = () => {
   const location = useLocation();
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
 
-  if (isLoadingPublicSettings || isLoadingAuth) {
+  // Trigger redirect as a side effect (never during render) to avoid
+  // re-render loops and ensure the spinner stays visible during the redirect.
+  const needsLogin = authError?.type === 'auth_required';
+  useEffect(() => {
+    if (needsLogin) {
+      navigateToLogin();
+    }
+  }, [needsLogin, navigateToLogin]);
+
+  // While auth is resolving OR a login redirect is in progress, show the spinner.
+  if (isLoadingPublicSettings || isLoadingAuth || needsLogin) {
     return <Spinner />;
   }
 
-  if (authError) {
-    if (authError.type === 'user_not_registered') {
-      return <UserNotRegisteredError />;
-    } else if (authError.type === 'auth_required') {
-      navigateToLogin();
-      return <Spinner />;
-    }
+  if (authError?.type === 'user_not_registered') {
+    return <UserNotRegisteredError />;
   }
 
   return (
