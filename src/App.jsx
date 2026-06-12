@@ -10,6 +10,8 @@ import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import Profile from './pages/Profile';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect } from 'react';
+import ErrorBoundary from '@/components/ErrorBoundary';
+import { isAppConfigured } from '@/lib/app-params';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -105,18 +107,43 @@ const AuthenticatedApp = () => {
 };
 
 
+const ConfigurationNeeded = () => (
+  <div className="fixed inset-0 flex items-center justify-center bg-gray-50 p-6">
+    <div className="max-w-md w-full bg-white rounded-2xl shadow-sm border border-gray-100 p-6 text-center">
+      <div className="text-5xl mb-4">⚙️</div>
+      <h1 className="text-xl font-bold text-gray-800 mb-2">Configuration needed</h1>
+      <p className="text-sm text-gray-600 mb-4">
+        This app couldn&apos;t find a valid Base44 App ID, so it can&apos;t connect
+        to its backend. Set the <code className="font-mono">VITE_BASE44_APP_ID</code>{' '}
+        environment variable to your real Base44 App ID (not a placeholder), then
+        redeploy.
+      </p>
+      <p className="text-xs text-gray-400">
+        Also set <code className="font-mono">VITE_BASE44_APP_BASE_URL</code> to your
+        app&apos;s base URL.
+      </p>
+    </div>
+  </div>
+);
+
 function App() {
 
+  if (!isAppConfigured) {
+    return <ConfigurationNeeded />;
+  }
+
   return (
-    <AuthProvider>
-      <QueryClientProvider client={queryClientInstance}>
-        <Router>
-          <NavigationTracker />
-          <AuthenticatedApp />
-        </Router>
-        <Toaster />
-      </QueryClientProvider>
-    </AuthProvider>
+    <ErrorBoundary>
+      <AuthProvider>
+        <QueryClientProvider client={queryClientInstance}>
+          <Router>
+            <NavigationTracker />
+            <AuthenticatedApp />
+          </Router>
+          <Toaster />
+        </QueryClientProvider>
+      </AuthProvider>
+    </ErrorBoundary>
   )
 }
 
