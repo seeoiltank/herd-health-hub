@@ -52,3 +52,12 @@ const getAppParams = () => {
 export const appParams = {
 	...getAppParams()
 }
+
+// The Base44 App ID must be a real id. When the VITE_BASE44_APP_ID env var is
+// missing or accidentally set to a variable name / placeholder (e.g. the value
+// "VITE_BASE44_APP_BASE_URL"), the app boots with an invalid identity and every
+// Base44 API/auth call fails — which previously surfaced as a blank page.
+const appId = appParams.appId;
+export const isAppConfigured = Boolean(
+	appId && typeof appId === 'string' && !appId.startsWith('VITE_')
+);
