@@ -68,9 +68,16 @@ export const AuthProvider = ({ children }) => {
         if (appParams.token) {
           await checkUserAuth();
         } else {
+          // No token present — this app requires authentication.
+          // Set auth_required so the app redirects to login instead of
+          // rendering protected pages (which causes a flash then blank screen).
           setIsLoadingAuth(false);
           setIsAuthenticated(false);
           setAuthChecked(true);
+          setAuthError({
+            type: 'auth_required',
+            message: 'Authentication required'
+          });
         }
         setIsLoadingPublicSettings(false);
       } catch (appError) {
