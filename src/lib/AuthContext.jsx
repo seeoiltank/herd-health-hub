@@ -5,20 +5,6 @@ import { createAxiosClient } from '@base44/sdk/dist/utils/axios-client';
 
 const AuthContext = createContext();
 
-const missingRequiredEnvVars = () => {
-  const missing = [];
-
-  if (!appParams.appId) {
-    missing.push('VITE_BASE44_APP_ID');
-  }
-
-  if (!appParams.appBaseUrl) {
-    missing.push('VITE_BASE44_APP_BASE_URL');
-  }
-
-  return missing;
-};
-
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -36,18 +22,6 @@ export const AuthProvider = ({ children }) => {
     try {
       setIsLoadingPublicSettings(true);
       setAuthError(null);
-
-      const missingEnvVars = missingRequiredEnvVars();
-      if (missingEnvVars.length > 0) {
-        setAuthError({
-          type: 'configuration_error',
-          message: `Missing required environment variables: ${missingEnvVars.join(', ')}`
-        });
-        setIsLoadingPublicSettings(false);
-        setIsLoadingAuth(false);
-        setAuthChecked(true);
-        return;
-      }
       
       // First, check app public settings (with token if available)
       // This will tell us if auth is required, user not registered, etc.
@@ -68,16 +42,9 @@ export const AuthProvider = ({ children }) => {
         if (appParams.token) {
           await checkUserAuth();
         } else {
-          // No token present — this app requires authentication.
-          // Set auth_required so the app redirects to login instead of
-          // rendering protected pages (which causes a flash then blank screen).
           setIsLoadingAuth(false);
           setIsAuthenticated(false);
           setAuthChecked(true);
-          setAuthError({
-            type: 'auth_required',
-            message: 'Authentication required'
-          });
         }
         setIsLoadingPublicSettings(false);
       } catch (appError) {
