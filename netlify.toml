@@ -1,0 +1,9 @@
+# Build-time environment variables for the Base44-powered SPA.
+# These VITE_-prefixed values are read by Vite during `vite build` and
+# inlined into the client bundle (see src/lib/app-params.js). They are
+# non-secret, client-visible values. Defining them here ensures every
+# deploy builds against the correct Base44 app, and values set in this
+# file take precedence over the Netlify UI/CLI/API.
+[build.environment]
+  VITE_BASE44_APP_ID = "697e2554c4dfc2b998c229c0"
+  VITE_BASE44_APP_BASE_URL = "https://app.base44.com"
