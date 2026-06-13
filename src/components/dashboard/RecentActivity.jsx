@@ -1,7 +1,15 @@
 import React, { useMemo } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Activity, Syringe, Stethoscope } from "lucide-react";
-import { format } from "date-fns";
+import { format, isValid } from "date-fns";
+
+// Safely format a date value; returns "" if the value is missing/invalid
+// so a bad record never crashes the whole app to a white screen.
+const safeFormat = (value, fmt) => {
+  if (!value) return "";
+  const d = new Date(value);
+  return isValid(d) ? format(d, fmt) : "";
+};
 
 export default function RecentActivity({ healthRecords, vaccinations, animals }) {
   const animalNameById = useMemo(
@@ -70,7 +78,7 @@ export default function RecentActivity({ healthRecords, vaccinations, animals })
                   <div className="flex items-center justify-between">
                     <p className="font-medium text-gray-800 capitalize">{activity.title.replace(/_/g, ' ')}</p>
                     <span className="text-xs text-gray-500">
-                      {format(new Date(activity.date), 'MMM d')}
+                      {safeFormat(activity.date, 'MMM d')}
                     </span>
                   </div>
                   <p className="text-sm text-gray-600">{activity.animal}</p>

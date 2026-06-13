@@ -2,7 +2,15 @@ import React, { useMemo } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, AlertTriangle } from "lucide-react";
-import { format, isPast, differenceInDays } from "date-fns";
+import { format, isPast, differenceInDays, isValid } from "date-fns";
+
+// Safely format a date value; returns "" if missing/invalid so a single
+// bad record can't crash the whole app to a white screen.
+const safeFormat = (value, fmt) => {
+  if (!value) return "";
+  const d = new Date(value);
+  return isValid(d) ? format(d, fmt) : "";
+};
 
 export default function UpcomingVaccinations({ vaccinations, animals }) {
   const animalNameById = useMemo(
@@ -15,7 +23,7 @@ export default function UpcomingVaccinations({ vaccinations, animals }) {
   const upcomingVaccinations = useMemo(
     () =>
       vaccinations
-        .filter((v) => v.next_due_date)
+        .filter((v) => v.next_due_date && isValid(new Date(v.next_due_date)))
         .sort((a, b) => new Date(a.next_due_date) - new Date(b.next_due_date))
         .slice(0, 5),
     [vaccinations]
@@ -71,7 +79,7 @@ export default function UpcomingVaccinations({ vaccinations, animals }) {
                         )}
                       </Badge>
                       <p className="text-xs text-gray-500 mt-1">
-                        {format(new Date(vax.next_due_date), 'MMM d, yyyy')}
+                        {safeFormat(vax.next_due_date, 'MMM d, yyyy')}
                       </p>
                     </div>
                   </div>
