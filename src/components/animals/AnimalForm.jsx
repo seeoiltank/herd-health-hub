@@ -63,8 +63,10 @@ export default function AnimalForm({ open, onClose, animal, onSave }) {
       });
       return { previous };
     },
-    onError: (_err, _data, context) => {
+    onError: (err, _data, context) => {
       if (context?.previous) queryClient.setQueryData(['animals'], context.previous);
+      // eslint-disable-next-line no-alert
+      alert("Failed to save animal: " + (err?.message || JSON.stringify(err)));
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['animals'] });
@@ -89,6 +91,14 @@ export default function AnimalForm({ open, onClose, animal, onSave }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (!formData.name?.trim()) {
+      alert("Please enter a name.");
+      return;
+    }
+    if (!formData.species) {
+      alert("Please select a species.");
+      return;
+    }
     const dataToSave = {
       ...formData,
       weight: formData.weight ? parseFloat(formData.weight) : null
@@ -155,7 +165,6 @@ export default function AnimalForm({ open, onClose, animal, onSave }) {
                 placeholder="Select species"
                 options={speciesOptions}
                 label="Species"
-                required
               />
             </div>
 
