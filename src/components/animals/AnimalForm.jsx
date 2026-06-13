@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ResponsiveSelect } from "@/components/ui/responsive-select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { base44 } from "@/api/base44Client";
+import { appParams } from "@/lib/app-params";
 import { Camera, Loader2, X } from "lucide-react";
 
 const speciesOptions = [
@@ -60,8 +61,9 @@ export default function AnimalForm({ open, onClose, animal, onSave }) {
     onError: (err) => {
       // eslint-disable-next-line no-alert
       alert(
-        "Save failed [" + (err?.response?.status || "?") + "] url=" +
-        (err?.response?.config?.url || err?.config?.url || "?") + " :: " +
+        "Save failed [" + (err?.response?.status || "?") + "]\n" +
+        "appId=" + (appParams?.appId || "MISSING") + "\n" +
+        "url=" + (err?.response?.config?.url || err?.config?.url || "?") + "\n" +
         (err?.response?.data?.message || err?.message || JSON.stringify(err))
       );
     }
