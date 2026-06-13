@@ -55,11 +55,12 @@ export default function AnimalForm({ open, onClose, animal, onSave }) {
     onMutate: async (dataToSave) => {
       await queryClient.cancelQueries({ queryKey: ['animals'] });
       const previous = queryClient.getQueryData(['animals']);
-      queryClient.setQueryData(['animals'], (old = []) =>
-        animal?.id
-          ? old.map(a => a.id === animal.id ? { ...a, ...dataToSave } : a)
-          : [{ ...dataToSave, id: `temp-${Date.now()}` }, ...old]
-      );
+      queryClient.setQueryData(['animals'], (old) => {
+        const list = Array.isArray(old) ? old : [];
+        return animal?.id
+          ? list.map(a => a.id === animal.id ? { ...a, ...dataToSave } : a)
+          : [{ ...dataToSave, id: `temp-${Date.now()}` }, ...list];
+      });
       return { previous };
     },
     onError: (_err, _data, context) => {
