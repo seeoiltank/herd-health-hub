@@ -60,6 +60,7 @@ export function ResponsiveSelect({ value, onValueChange, placeholder, options, l
   return (
     <Drawer open={open} onOpenChange={setOpen}>
       <Button
+        type="button"
         variant="outline"
         onClick={() => setOpen(true)}
         className={cn(
