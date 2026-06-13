@@ -59,7 +59,11 @@ export default function AnimalForm({ open, onClose, animal, onSave }) {
     },
     onError: (err) => {
       // eslint-disable-next-line no-alert
-      alert("Save failed: " + (err?.response?.data?.message || err?.message || JSON.stringify(err)));
+      alert(
+        "Save failed [" + (err?.response?.status || "?") + "] url=" +
+        (err?.response?.config?.url || err?.config?.url || "?") + " :: " +
+        (err?.response?.data?.message || err?.message || JSON.stringify(err))
+      );
     }
   });
 
@@ -85,10 +89,18 @@ export default function AnimalForm({ open, onClose, animal, onSave }) {
       alert("Please select a species.");
       return;
     }
-    const dataToSave = {
-      ...formData,
-      weight: formData.weight ? parseFloat(formData.weight) : null
-    };
+    const dataToSave = { ...formData };
+    if (dataToSave.weight) {
+      dataToSave.weight = parseFloat(dataToSave.weight);
+    } else {
+      delete dataToSave.weight;
+    }
+    // Remove empty optional fields so we don't send blank values
+    Object.keys(dataToSave).forEach((key) => {
+      if (dataToSave[key] === "" || dataToSave[key] === null) {
+        delete dataToSave[key];
+      }
+    });
     mutation.mutate(dataToSave);
   };
 
