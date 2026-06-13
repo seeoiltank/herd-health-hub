@@ -52,24 +52,8 @@ export default function AnimalForm({ open, onClose, animal, onSave }) {
       animal?.id
         ? base44.entities.Animal.update(animal.id, dataToSave)
         : base44.entities.Animal.create(dataToSave),
-    onMutate: async (dataToSave) => {
-      await queryClient.cancelQueries({ queryKey: ['animals'] });
-      const previous = queryClient.getQueryData(['animals']);
-      queryClient.setQueryData(['animals'], (old) => {
-        const list = Array.isArray(old) ? old : [];
-        return animal?.id
-          ? list.map(a => a.id === animal.id ? { ...a, ...dataToSave } : a)
-          : [{ ...dataToSave, id: `temp-${Date.now()}` }, ...list];
-      });
-      return { previous };
-    },
-    onError: (_err, _data, context) => {
-      if (context?.previous) queryClient.setQueryData(['animals'], context.previous);
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['animals'] });
-    },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['animals'] });
       onSave();
       onClose();
     }

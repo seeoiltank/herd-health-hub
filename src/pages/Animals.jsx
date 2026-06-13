@@ -238,6 +238,7 @@ export default function Animals() {
 
       {/* Add Animal Form */}
       <AnimalForm
+        key={showForm ? 'open' : 'closed'}
         open={showForm}
         onClose={() => setShowForm(false)}
         onSave={() => queryClient.invalidateQueries({ queryKey: ['animals'] })}
