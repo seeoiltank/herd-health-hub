@@ -18,19 +18,30 @@ export default function Dashboard() {
   const queryClient = useQueryClient();
   const [isRefreshing, setIsRefreshing] = useState(false);
 
+  // Always coerce query results to arrays so a non-array response
+  // (e.g. an error object in production) can never reach .filter/.map.
   const { data: animals = [], isLoading: loadingAnimals } = useQuery({
     queryKey: ['animals'],
-    queryFn: () => base44.entities.Animal.list('-created_date')
+    queryFn: async () => {
+      const res = await base44.entities.Animal.list('-created_date');
+      return Array.isArray(res) ? res : [];
+    }
   });
 
   const { data: healthRecords = [], isLoading: loadingHealth } = useQuery({
     queryKey: ['healthRecords'],
-    queryFn: () => base44.entities.HealthRecord.list('-date', 50)
+    queryFn: async () => {
+      const res = await base44.entities.HealthRecord.list('-date', 50);
+      return Array.isArray(res) ? res : [];
+    }
   });
 
   const { data: vaccinations = [], isLoading: loadingVax } = useQuery({
     queryKey: ['vaccinations'],
-    queryFn: () => base44.entities.Vaccination.list('-date_given', 50)
+    queryFn: async () => {
+      const res = await base44.entities.Vaccination.list('-date_given', 50);
+      return Array.isArray(res) ? res : [];
+    }
   });
 
   const isLoading = loadingAnimals || loadingHealth || loadingVax;

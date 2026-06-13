@@ -12,21 +12,24 @@ const safeFormat = (value, fmt) => {
   return isValid(d) ? format(d, fmt) : "";
 };
 
-export default function UpcomingVaccinations({ vaccinations, animals }) {
+export default function UpcomingVaccinations({ vaccinations = [], animals = [] }) {
+  const safeVaccinations = Array.isArray(vaccinations) ? vaccinations : [];
+  const safeAnimals = Array.isArray(animals) ? animals : [];
+
   const animalNameById = useMemo(
-    () => new Map(animals.map((animal) => [animal.id, animal.name || "Unknown"])),
-    [animals]
+    () => new Map(safeAnimals.map((animal) => [animal.id, animal.name || "Unknown"])),
+    [safeAnimals]
   );
 
   const getAnimalName = (animalId) => animalNameById.get(animalId) || "Unknown";
 
   const upcomingVaccinations = useMemo(
     () =>
-      vaccinations
+      safeVaccinations
         .filter((v) => v.next_due_date && isValid(new Date(v.next_due_date)))
         .sort((a, b) => new Date(a.next_due_date) - new Date(b.next_due_date))
         .slice(0, 5),
-    [vaccinations]
+    [safeVaccinations]
   );
 
   return (

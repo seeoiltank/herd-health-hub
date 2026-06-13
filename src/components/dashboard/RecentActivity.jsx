@@ -11,10 +11,14 @@ const safeFormat = (value, fmt) => {
   return isValid(d) ? format(d, fmt) : "";
 };
 
-export default function RecentActivity({ healthRecords, vaccinations, animals }) {
+export default function RecentActivity({ healthRecords = [], vaccinations = [], animals = [] }) {
+  const safeHealthRecords = Array.isArray(healthRecords) ? healthRecords : [];
+  const safeVaccinations = Array.isArray(vaccinations) ? vaccinations : [];
+  const safeAnimals = Array.isArray(animals) ? animals : [];
+
   const animalNameById = useMemo(
-    () => new Map(animals.map((animal) => [animal.id, animal.name || "Unknown"])),
-    [animals]
+    () => new Map(safeAnimals.map((animal) => [animal.id, animal.name || "Unknown"])),
+    [safeAnimals]
   );
 
   const getAnimalName = (animalId) => animalNameById.get(animalId) || "Unknown";
@@ -23,7 +27,7 @@ export default function RecentActivity({ healthRecords, vaccinations, animals })
   const activities = useMemo(
     () =>
       [
-        ...healthRecords.map((r) => ({
+        ...safeHealthRecords.map((r) => ({
           id: r.id,
           type: 'health',
           date: r.date,
@@ -31,7 +35,7 @@ export default function RecentActivity({ healthRecords, vaccinations, animals })
           animal: getAnimalName(r.animal_id),
           description: r.description
         })),
-        ...vaccinations.map((v) => ({
+        ...safeVaccinations.map((v) => ({
           id: v.id,
           type: 'vaccination',
           date: v.date_given,
@@ -42,7 +46,7 @@ export default function RecentActivity({ healthRecords, vaccinations, animals })
       ]
         .sort((a, b) => new Date(b.date) - new Date(a.date))
         .slice(0, 5),
-    [healthRecords, vaccinations, animalNameById]
+    [safeHealthRecords, safeVaccinations, animalNameById]
   );
 
   return (
