@@ -39,8 +39,22 @@ const getAppParams = () => {
 		storage.removeItem('base44_access_token');
 		storage.removeItem('token');
 	}
+
+	// Auto-correction: the build-time app_id is the single source of truth.
+	// Ignore any stale URL/localStorage app_id (which can point to a different
+	// app and cause "App not found" on writes). Overwrite the cache to the
+	// correct value so reads and writes always target this app.
+	const buildAppId = import.meta.env.VITE_BASE44_APP_ID;
+	let appId = getAppParamValue("app_id", { defaultValue: buildAppId });
+	if (buildAppId && appId !== buildAppId) {
+		appId = buildAppId;
+		if (!isNode) {
+			storage.setItem('base44_app_id', buildAppId);
+		}
+	}
+
 	return {
-		appId: getAppParamValue("app_id", { defaultValue: import.meta.env.VITE_BASE44_APP_ID }),
+		appId,
 		token: getAppParamValue("access_token", { removeFromUrl: true }),
 		fromUrl: getAppParamValue("from_url", { defaultValue: window.location.href }),
 		functionsVersion: getAppParamValue("functions_version", { defaultValue: import.meta.env.VITE_BASE44_FUNCTIONS_VERSION }),
