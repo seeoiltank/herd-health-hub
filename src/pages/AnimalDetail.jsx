@@ -71,13 +71,19 @@ export default function AnimalDetail() {
 
   const { data: healthRecords = [], isLoading: loadingHealth } = useQuery({
     queryKey: ['healthRecords', animalId],
-    queryFn: () => base44.entities.HealthRecord.filter({ animal_id: animalId }, '-date'),
+    queryFn: async () => {
+      const res = await base44.entities.HealthRecord.filter({ animal_id: animalId }, '-date');
+      return Array.isArray(res) ? res : [];
+    },
     enabled: !!animalId
   });
 
   const { data: vaccinations = [], isLoading: loadingVax } = useQuery({
     queryKey: ['vaccinations', animalId],
-    queryFn: () => base44.entities.Vaccination.filter({ animal_id: animalId }, '-date_given'),
+    queryFn: async () => {
+      const res = await base44.entities.Vaccination.filter({ animal_id: animalId }, '-date_given');
+      return Array.isArray(res) ? res : [];
+    },
     enabled: !!animalId
   });
 

@@ -18,12 +18,18 @@ export default function Vaccinations() {
 
   const { data: animals = [], isLoading: loadingAnimals } = useQuery({
     queryKey: ['animals'],
-    queryFn: () => base44.entities.Animal.list()
+    queryFn: async () => {
+      const res = await base44.entities.Animal.list();
+      return Array.isArray(res) ? res : [];
+    }
   });
 
   const { data: vaccinations = [], isLoading: loadingVax } = useQuery({
     queryKey: ['vaccinations'],
-    queryFn: () => base44.entities.Vaccination.list('-date_given')
+    queryFn: async () => {
+      const res = await base44.entities.Vaccination.list('-date_given');
+      return Array.isArray(res) ? res : [];
+    }
   });
 
   const animalNameById = useMemo(

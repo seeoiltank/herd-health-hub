@@ -24,7 +24,10 @@ export default function Animals() {
 
   const { data: animals = [], isLoading } = useQuery({
     queryKey: ['animals'],
-    queryFn: () => base44.entities.Animal.list('-created_date')
+    queryFn: async () => {
+      const res = await base44.entities.Animal.list('-created_date');
+      return Array.isArray(res) ? res : [];
+    }
   });
 
   const handleRefresh = useCallback(async () => {

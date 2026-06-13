@@ -27,12 +27,18 @@ export default function HealthRecords() {
 
   const { data: animals = [], isLoading: loadingAnimals } = useQuery({
     queryKey: ['animals'],
-    queryFn: () => base44.entities.Animal.list()
+    queryFn: async () => {
+      const res = await base44.entities.Animal.list();
+      return Array.isArray(res) ? res : [];
+    }
   });
 
   const { data: healthRecords = [], isLoading: loadingRecords } = useQuery({
     queryKey: ['healthRecords'],
-    queryFn: () => base44.entities.HealthRecord.list('-date')
+    queryFn: async () => {
+      const res = await base44.entities.HealthRecord.list('-date');
+      return Array.isArray(res) ? res : [];
+    }
   });
 
   const animalNameById = useMemo(
