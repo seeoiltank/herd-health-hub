@@ -56,6 +56,10 @@ export default function AnimalForm({ open, onClose, animal, onSave }) {
       queryClient.invalidateQueries({ queryKey: ['animals'] });
       onSave();
       onClose();
+    },
+    onError: (err) => {
+      // eslint-disable-next-line no-alert
+      alert("Save failed: " + (err?.response?.data?.message || err?.message || JSON.stringify(err)));
     }
   });
 
