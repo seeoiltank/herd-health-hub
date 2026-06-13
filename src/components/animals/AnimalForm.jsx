@@ -63,10 +63,8 @@ export default function AnimalForm({ open, onClose, animal, onSave }) {
       });
       return { previous };
     },
-    onError: (err, _data, context) => {
+    onError: (_err, _data, context) => {
       if (context?.previous) queryClient.setQueryData(['animals'], context.previous);
-      // eslint-disable-next-line no-alert
-      alert("Failed to save animal: " + (err?.message || JSON.stringify(err)));
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['animals'] });
